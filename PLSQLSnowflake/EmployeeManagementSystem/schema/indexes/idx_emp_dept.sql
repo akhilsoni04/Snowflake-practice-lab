@@ -1,0 +1,1 @@
+CREATE INDEX idx_emp_dept ON employees(department_id);
