@@ -1,1 +1,0 @@
-CREATE INDEX idx_emp_salary ON employees(salary);
