@@ -33,7 +33,7 @@ NULL_IF = ('NULL', 'null', '');
 -- IF using vs code run this command in terminal or if you are using snowflake ui then manually do it from ingestion
 --PUT file://C:/path/to/your/employees.csv @emp_stage AUTO_COMPRESS=TRUE;
 
-PUT file://C:/Users/HP/OneDrive/Desktop/PL_SQL_Snowflake/DeepalEmployeesData.csv 
+PUT file://C:/path of your file/DeepalEmployeesData.csv 
     @emp_stage 
     AUTO_COMPRESS=TRUE;
 
