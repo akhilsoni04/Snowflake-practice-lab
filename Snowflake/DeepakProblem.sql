@@ -57,15 +57,16 @@ SELECT * FROM employees LIMIT 10;
 
 -- Loads data from a CSV file in a stage into the employees table while transforming it.
 
+/* Snowflake does allow many transformation functions inside COPY when they are simple row-level expressions. 
+The restriction applies to joins, aggregations, and complex queries, not basic transformations like UPPER, LOWER, COALESCE, or type casting. */
 
-/* Snowflake does allow many transformation functions inside COPY when they are simple row-level expressions. The restriction applies to joins, aggregations, and complex queries, not basic transformations like UPPER, LOWER, COALESCE, or type casting. */
 
-
-/* In Snowflake COPY INTO ... FROM (SELECT ...), only row-by-row transformations are allowed (like casting, UPPER/LOWER, COALESCE, TRY_TO_DATE). Operations that require multiple rows or other tables (like JOIN, GROUP BY, window functions, or subqueries) are not allowed. */
+/* In Snowflake COPY INTO ... FROM (SELECT ...), only row-by-row transformations are allowed (like casting, UPPER/LOWER, COALESCE, TRY_TO_DATE). 
+Operations that require multiple rows or other tables (like JOIN, GROUP BY, window functions, or subqueries) are not allowed. */
 
 
 /* 
-We were using direct 
+We were using direct tranformation like this
 
 COPY INTO employees
 (first_name, last_name, email, phone_number, salary, department_id, hire_date)
@@ -83,7 +84,7 @@ FROM (
 FILE_FORMAT = ff_emp_csv;
 
 
-
+    - Major mistake part
 
 COPY INTO employees
 FROM (
@@ -94,50 +95,44 @@ FROM (
   FROM @EMP_STAGE/DeepalEmployeesData.csv
 )
 FILE_FORMAT = ff_emp_csv;
-```
 
 ---
 
-## **The Mistakes:**
+The Mistakes:
+❌ Mistake #1: Using Functions Not Supported in COPY INTO
 
-### **❌ Mistake #1: Using Functions Not Supported in COPY INTO**
+    You tried to use:
+`UPPER()` - Not allowed in COPY INTO
+`LOWER()` - Not allowed in COPY INTO
+`COALESCE()` - Not allowed in COPY INTO
+`TRY_TO_DATE()` - Not allowed in COPY INTO
 
-**You tried to use:**
-- `UPPER()` - Not allowed in COPY INTO
-- `LOWER()` - Not allowed in COPY INTO
-- `COALESCE()` - Not allowed in COPY INTO
-- `TRY_TO_DATE()` - Not allowed in COPY INTO
+* Snowflake's COPY INTO has LIMITED transformation support.
 
-**Snowflake's COPY INTO has LIMITED transformation support.**
+    Only these are allowed:
+✅ Column references: `$1, $2, $3`
+✅ Type casting: `$1::VARCHAR`, `$5::NUMBER`, `$7::DATE`
+✅ Simple column reordering
 
-**Only these are allowed:**
-- ✅ Column references: `$1, $2, $3`
-- ✅ Type casting: `$1::VARCHAR`, `$5::NUMBER`, `$7::DATE`
-- ✅ Simple column reordering
+    NOT allowed:
+❌ String functions: `UPPER, LOWER, TRIM, CONCAT`
+❌ Conditional functions: `COALESCE, CASE, IFF`
+❌ Date functions: `TRY_TO_DATE, DATEADD, DATEDIFF`
+❌ Math functions: `ROUND, FLOOR, ABS`
+❌ Aggregate functions: `SUM, AVG, COUNT`
 
-**NOT allowed:**
-- ❌ String functions: `UPPER, LOWER, TRIM, CONCAT`
-- ❌ Conditional functions: `COALESCE, CASE, IFF`
-- ❌ Date functions: `TRY_TO_DATE, DATEADD, DATEDIFF`
-- ❌ Math functions: `ROUND, FLOOR, ABS`
-- ❌ Aggregate functions: `SUM, AVG, COUNT`
 
----
+❌ Mistake #2: Trying to Do Everything in One Step**
 
-### **❌ Mistake #2: Trying to Do Everything in One Step**
-
-**Your approach:**
-```
+Your approach:
 CSV → Transform while loading → Final table
-```
 
-**Problem:** Snowflake doesn't support complex transformations during COPY.
 
-**Correct approach (what you're doing now):**
-```
+Problem: Snowflake doesn't support complex transformations during COPY.
+Correct approach (what you're doing now):
+
 CSV → Load raw → Transform in SQL → Final table
 */
-
 
 
 -- Load to Staging, Then Transform to Final Table (Better!)
