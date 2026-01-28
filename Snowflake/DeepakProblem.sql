@@ -30,7 +30,7 @@ NULL_IF = ('NULL', 'null', '');
 
 -- Upload File to Stage
 
--- IF using vs code run this command in terminal or if you are using snowflake ui then manually do it from ingestion
+-- IF using vs code run this command or if you are using snowflake ui then manually do it from data ingestion / Load data through GUI.
 --PUT file://C:/path/to/your/employees.csv @emp_stage AUTO_COMPRESS=TRUE;
 
 PUT file://C:/path of your file/DeepalEmployeesData.csv 
@@ -175,7 +175,8 @@ SELECT * FROM employees LIMIT 10;
 Problem & Solution Note
 
 Problem:
-Cannot use transformation functions like UPPER(), LOWER(), COALESCE() directly in COPY INTO statement because Snowflake's COPY command only supports basic operations (column references $1, $2 and type casting ::NUMBER, ::DATE).
+Cannot use transformation functions like UPPER(), LOWER(), COALESCE() directly in COPY INTO statement 
+because Snowflake's COPY command only supports basic operations (column references $1, $2 and type casting ::NUMBER, ::DATE).
 
 Solution:
 Use two-step ELT approach:
