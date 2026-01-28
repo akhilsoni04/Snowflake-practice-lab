@@ -13,7 +13,7 @@ FROM (
     $6::NUMBER AS department_id,
     COALESCE(TRY_TO_DATE($7, 'MM/DD/YYYY'), CURRENT_DATE()) AS hire_date
   FROM @EMP_STAGE/employees.csv
-)
+) 
 FILE_FORMAT = ff_emp_csv
 ON_ERROR = CONTINUE;
 
@@ -197,3 +197,38 @@ WHERE rn = 1;
 -- STEP 4 — Verify
 SELECT * FROM dim_employees ORDER BY emp_sk;
 
+
+
+
+-- testing of unloaded data
+-- Step 1 — Check If Files Were Created
+LIST @my_unload_stage;
+
+-- Step 2 — Preview File Content Inside Snowflake
+SELECT $1, $2, $3, $4, $5
+FROM @my_unload_stage/employees_export_0_0_0.csv
+(FILE_FORMAT => ff_unload_csv)
+LIMIT 10;
+
+
+-- Step 3 — Compare Row Count
+-- Check original table:
+SELECT COUNT(*) FROM employees;
+
+
+-- Then count rows in file:
+
+SELECT COUNT(*)
+FROM @my_unload_stage/employees_export_0_0_0.csv
+(FILE_FORMAT => ff_unload_csv);
+
+
+-- Step 4 — Download File (Optional)
+/*
+
+Go to Data → Stages
+Open MY_UNLOAD_STAGE
+Select the file
+Click Download 
+
+*/
