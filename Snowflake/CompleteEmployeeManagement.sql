@@ -402,3 +402,10 @@ Go to Data → Stages
 Open MY_UNLOAD_STAGE
 Select the file
 Click Download */
+
+
+-- View data directly from unloaded stage
+SELECT $1, $2, $3, $4, $5, 
+FROM @my_unload_stage/employees_export_0_0_0.csv
+LIMIT 10;
+
